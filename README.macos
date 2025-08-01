@@ -1,0 +1,171 @@
+# Building ARAnyM on macOS
+
+This document describes how to build ARAnyM on macOS using Homebrew SDL2.
+
+## Prerequisites
+
+1. **Xcode Command Line Tools**:
+   ```bash
+   xcode-select --install
+   ```
+
+2. **Homebrew** (if not already installed):
+   ```bash
+   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+   ```
+
+3. **SDL2 via Homebrew**:
+   ```bash
+   brew install sdl2 sdl2_ttf
+   ```
+
+## Building from Source
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/tenox7/aranym-macos.git
+cd aranym-macos
+```
+
+### 2. Generate Build System (if needed)
+If you've modified `Makefile.am`, `configure.ac`, or are building from a fresh git clone, regenerate the build system:
+
+```bash
+./autogen.sh
+```
+
+This will run:
+- `aclocal`
+- `autoconf`
+- `autoheader`
+- `automake`
+- `configure` (with no arguments)
+
+### 3. Configure the Build
+For a fresh configuration or to regenerate the Makefile with our macOS-specific settings:
+
+```bash
+PATH="/opt/homebrew/bin:$PATH" \
+PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig" \
+CXX="clang++ -stdlib=libc++" \
+./configure --with-fink --disable-nfclipbrd
+```
+
+**Configuration options explained:**
+- `--with-fink`: Use Homebrew SDL2 instead of macOS frameworks
+- `--disable-nfclipbrd`: Disable clipboard support (avoids Darwin-specific compilation issues)
+- `CXX="clang++ -stdlib=libc++"`: Use proper C++ standard library
+
+### 4. Build ARAnyM
+```bash
+make CPPFLAGS="-I/Library/Developer/CommandLineTools/SDKs/MacOSX15.5.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/SDKs/MacOSX15.5.sdk/usr/include" \
+     LDFLAGS="-framework CoreFoundation -framework IOKit -framework Security -framework AppKit"
+```
+
+**Build flags explained:**
+- `CPPFLAGS`: Include paths for C++ standard library headers
+- `LDFLAGS`: Required macOS frameworks for system integration
+
+### 5. Create macOS App Bundle
+```bash
+make ARAnyM.app
+```
+
+This creates `ARAnyM.app` with the proper bundle structure.
+
+### 6. Create DMG Distribution Package
+```bash
+make dmg
+```
+
+This creates `aranym.dmg` containing the complete `ARAnyM.app` bundle.
+
+## Complete Build Script
+
+For convenience, here's a complete build script:
+
+```bash
+#!/bin/bash
+set -e
+
+# Set environment
+export PATH="/opt/homebrew/bin:$PATH"
+export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig"
+export CXX="clang++ -stdlib=libc++"
+
+# Configure
+./configure --with-fink --disable-nfclipbrd
+
+# Build
+make CPPFLAGS="-I/Library/Developer/CommandLineTools/SDKs/MacOSX15.5.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/SDKs/MacOSX15.5.sdk/usr/include" \
+     LDFLAGS="-framework CoreFoundation -framework IOKit -framework Security -framework AppKit"
+
+# Create app bundle
+make ARAnyM.app
+
+# Create DMG
+make dmg
+
+echo "Build complete! Generated files:"
+echo "  - aranym (command line binary)"
+echo "  - ARAnyM.app (macOS app bundle)"
+echo "  - aranym.dmg (distribution package)"
+```
+
+## Troubleshooting
+
+### Missing C++ Headers
+If you get errors about missing `<map>`, `<cstdio>`, etc., ensure you have the Command Line Tools installed:
+```bash
+xcode-select --install
+```
+
+### SDL2 Not Found
+If configure can't find SDL2:
+1. Verify SDL2 is installed: `brew list sdl2`
+2. Check pkg-config can find it: `pkg-config --cflags --libs sdl2`
+3. Ensure PKG_CONFIG_PATH is set correctly
+
+### Permission Errors
+If you get permission errors, make sure you're not using `sudo` and that Homebrew is properly installed for your user.
+
+## What's Different from Standard Build
+
+This macOS build includes several fixes for Apple Silicon/modern macOS:
+
+1. **C++ Header Compatibility**: Replaced `<cstdio>`, `<csetjmp>`, `<cstdlib>` with C headers
+2. **String Literal Fix**: Fixed C++11 string concatenation issues
+3. **Darwin Stub Functions**: Added stub implementations for missing Darwin-specific functions
+4. **Framework Linking**: Proper linking with required macOS frameworks
+5. **DMG Creation**: Added `make dmg` target for distribution packages
+
+## Testing the Build
+
+To test your build:
+
+```bash
+# Test command line version
+./aranym --help
+
+# Test app bundle
+open ARAnyM.app
+
+# Test DMG
+open aranym.dmg
+```
+
+## Distribution
+
+The `aranym.dmg` file is ready for distribution. Users can:
+1. Download and mount the DMG
+2. Drag `ARAnyM.app` to their Applications folder
+3. Launch ARAnyM from Applications or Launchpad
+
+## Getting Help
+
+If you encounter issues:
+1. Check this README for common solutions
+2. Verify all prerequisites are installed
+3. Try a clean build (`make clean && make`)
+4. Check the ARAnyM wiki: https://github.com/aranym/aranym/wiki
+5. Report issues at: https://github.com/tenox7/aranym-macos/issues
