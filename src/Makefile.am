@@ -588,8 +588,13 @@ $(APP_BUNDLE): $(APP)
 	done
 	find $(APP_BUNDLE)/Contents/Resources -type d -and \( -name CVS -or -name \*~.nib \) -or -name \*~ -or -name \*.bak | xargs rm -rf
 
+# Create DMG disk image
+$(APP).dmg: $(APP_BUNDLE)
+	rm -f $(APP).dmg
+	hdiutil create -srcfolder $(APP_BUNDLE) -volname "ARAnyM" -fs HFS+ -fsargs "-c c=64,a=16,e=16" -format UDBZ -size 50m $(APP).dmg
 
-
+.PHONY: dmg
+dmg: $(APP).dmg
 
 EXTRA_DIST += \
 	include \
