@@ -208,11 +208,11 @@ bool TunTapEthernetHandler::open() {
 
 		int result = executeScriptAsRoot( (char *)TAP_INIT, args );
 		if (result != 0) {
-			panicbug("ETH%d: ERROR: "TAP_INIT" failed (code %d). Ethernet disabled!", ethX, result);
+			panicbug("ETH%d: ERROR: " TAP_INIT " failed (code %d). Ethernet disabled!", ethX, result);
 		}
 		else {
 			failed = false;
-			D(bug("TunTap(%d): "TAP_INIT" initialized OK", ethX));
+			D(bug("TunTap(%d): " TAP_INIT " initialized OK", ethX));
 		}
 	}
 	

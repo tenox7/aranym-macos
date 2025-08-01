@@ -28,7 +28,7 @@
 
 #include "registers.h"
 
-# include <cstdlib>
+# include <stdlib.h>
 
 #define MMU_TEST_PTEST					1
 #define MMU_TEST_VERBOSE				2

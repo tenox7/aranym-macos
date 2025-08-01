@@ -39,7 +39,7 @@
 #include "m68k.h"
 #include "memory-uae.h"
 
-# include <csetjmp>
+# include <setjmp.h>
 
 extern struct fixup {
     int flag;

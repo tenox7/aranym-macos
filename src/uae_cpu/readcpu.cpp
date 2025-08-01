@@ -10,17 +10,10 @@
 #include "sysdeps.h"
 #include "readcpu.h"
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cctype>
-
-using std::strncmp;
-using std::abort;
-using std::fprintf;
-using std::strcmp;
-using std::strlen;
-using std::malloc;
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 
 int nr_cpuop_funcs;
 struct instr *table68k;

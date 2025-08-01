@@ -41,7 +41,7 @@
 #include "cpummu.h"
 #include "readcpu.h"
 
-# include <csetjmp>
+# include <setjmp.h>
 
 // newcpu.h
 extern void Exception (int, uaecptr);
